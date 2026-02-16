@@ -293,11 +293,10 @@ export default function DashboardPage() {
                 <button
                   key={filter}
                   onClick={() => setActiveFilter(filter)}
-                  className={`px-4 py-1.5 rounded-full text-sm font-medium whitespace-nowrap transition-all ${
-                    activeFilter === filter
-                      ? 'bg-slate-900 text-white shadow-md shadow-slate-200'
-                      : 'bg-white text-slate-500 border border-slate-200 hover:border-slate-300'
-                  }`}
+                  className={`px-4 py-1.5 rounded-full text-sm font-medium whitespace-nowrap transition-all ${activeFilter === filter
+                    ? 'bg-slate-900 text-white shadow-md shadow-slate-200'
+                    : 'bg-white text-slate-500 border border-slate-200 hover:border-slate-300'
+                    }`}
                 >
                   {filter === 'All' ? '모두' : getCategoryLabel(filter)}
                 </button>
@@ -310,9 +309,8 @@ export default function DashboardPage() {
                 filteredRetrospectives.map((retro) => (
                   <div
                     key={retro.id}
-                    className={`group bg-white rounded-xl border border-slate-100 p-5 hover:border-emerald-200 hover:shadow-lg hover:shadow-emerald-50 transition-all cursor-pointer relative overflow-hidden ${
-                      viewMode === 'list' ? 'flex items-start md:items-center gap-4' : 'flex flex-col'
-                    }`}
+                    className={`group bg-white rounded-xl border border-slate-100 p-5 hover:border-emerald-200 hover:shadow-lg hover:shadow-emerald-50 transition-all cursor-pointer relative overflow-hidden ${viewMode === 'list' ? 'flex items-start md:items-center gap-4' : 'flex flex-col'
+                      }`}
                   >
                     <div className={`absolute top-0 left-0 w-1 h-full ${getCategoryColor(retro.category).split(' ')[0]}`}></div>
 
@@ -398,12 +396,11 @@ export default function DashboardPage() {
   );
 }
 
-function NavItem({ icon: Icon, label, active = false }) {
+function NavItem({ icon: Icon, label, active = false }: { icon: React.ComponentType<{ size: number }>; label: string; active?: boolean }) {
   return (
     <div
-      className={`flex items-center gap-3 px-3 py-2.5 rounded-lg cursor-pointer transition-all ${
-        active ? 'bg-emerald-50 text-emerald-700 font-medium' : 'text-slate-500 hover:bg-slate-50 hover:text-slate-900'
-      }`}
+      className={`flex items-center gap-3 px-3 py-2.5 rounded-lg cursor-pointer transition-all ${active ? 'bg-emerald-50 text-emerald-700 font-medium' : 'text-slate-500 hover:bg-slate-50 hover:text-slate-900'
+        }`}
     >
       <Icon size={18} />
       <span className="text-sm">{label}</span>
