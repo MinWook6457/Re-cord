@@ -7,11 +7,27 @@ interface RetrospectiveCardProps {
     retrospective: Retrospective;
 }
 
-const categoryColors = {
-    keep: 'bg-green-100 border-green-300 text-green-800',
-    stop: 'bg-red-100 border-red-300 text-red-800',
-    start: 'bg-blue-100 border-blue-300 text-blue-800',
-    improve: 'bg-yellow-100 border-yellow-300 text-yellow-800',
+const categoryColors: { [key: string]: { bg: string; border: string; text: string } } = {
+    keep: {
+        bg: 'rgba(16, 185, 129, 0.15)',
+        border: '#10b981',
+        text: '#10b981'
+    },
+    stop: {
+        bg: 'rgba(239, 68, 68, 0.15)',
+        border: '#ef4444',
+        text: '#ef4444'
+    },
+    start: {
+        bg: 'rgba(118, 176, 166, 0.15)',
+        border: '#76B0A6',
+        text: '#76B0A6'
+    },
+    improve: {
+        bg: 'rgba(245, 158, 11, 0.15)',
+        border: '#f59e0b',
+        text: '#f59e0b'
+    },
 };
 
 const categoryLabels = {
@@ -37,8 +53,12 @@ export default function RetrospectiveCard({
                         </p>
                     </div>
                     <span
-                        className={`px-3 py-1 rounded-full text-sm font-medium ${categoryColors[retrospective.category]
-                            }`}
+                        className="px-3 py-1 rounded-full text-sm font-medium border"
+                        style={{
+                            backgroundColor: categoryColors[retrospective.category]?.bg,
+                            borderColor: categoryColors[retrospective.category]?.border,
+                            color: categoryColors[retrospective.category]?.text
+                        }}
                     >
                         {categoryLabels[retrospective.category]}
                     </span>

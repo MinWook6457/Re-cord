@@ -35,8 +35,7 @@ export default function DashboardHeader({
           {showNewButton && (
             <Link
               href="/dashboard/new"
-              className="px-4 py-2 text-white rounded-lg font-medium transition-colors"
-              style={{ backgroundColor: 'var(--color-primary)' }}
+              className="px-4 py-2 text-white rounded-lg font-medium transition-colors gradient-primary"
             >
               + 새 회고
             </Link>

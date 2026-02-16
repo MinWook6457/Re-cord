@@ -206,7 +206,7 @@ export default function EditRetrospectivePage() {
                             <button
                                 type="submit"
                                 disabled={saving}
-                                className="flex-1 bg-blue-600 text-white py-3 rounded-lg font-medium hover:bg-blue-700 transition-colors disabled:bg-gray-400"
+                                className="flex-1 text-white py-3 rounded-lg font-medium transition-colors disabled:bg-gray-400 gradient-primary"
                             >
                                 {saving ? '저장 중...' : '회고 수정'}
                             </button>

@@ -113,15 +113,14 @@ export default function ReadRetrospectivePage() {
                 </h1>
                 <div className="flex flex-wrap items-center gap-4">
                   <span
-                    className={`px-4 py-2 rounded-full text-sm font-semibold ${
-                      categoryColors[
-                        retrospective.category as keyof typeof categoryColors
+                    className={`px-4 py-2 rounded-full text-sm font-semibold ${categoryColors[
+                      retrospective.category as keyof typeof categoryColors
                       ]
-                    }`}
+                      }`}
                   >
                     {
                       categoryLabels[
-                        retrospective.category as keyof typeof categoryLabels
+                      retrospective.category as keyof typeof categoryLabels
                       ]
                     }
                   </span>
@@ -192,8 +191,7 @@ export default function ReadRetrospectivePage() {
           <div className="mt-8 flex gap-4 pt-8 border-t border-gray-200">
             <Link
               href={`/dashboard/${retrospective.id}/edit`}
-              className="px-6 py-3 text-white rounded-lg font-semibold transition-colors"
-              style={{ backgroundColor: 'var(--color-primary)' }}
+              className="px-6 py-3 text-white rounded-lg font-semibold transition-colors gradient-primary"
             >
               수정
             </Link>
