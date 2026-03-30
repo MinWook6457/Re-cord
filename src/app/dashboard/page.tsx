@@ -24,10 +24,12 @@ export default function DashboardPage() {
   const router = useRouter();
   const [viewMode, setViewMode] = useState('grid');
   const [activeFilter, setActiveFilter] = useState('All');
+  const [searchQuery, setSearchQuery] = useState('');
   const [retrospectives, setRetrospectives] = useState<Retrospective[]>([]);
   const [filteredRetrospectives, setFilteredRetrospectives] = useState<Retrospective[]>([]);
   const [loading, setLoading] = useState(true);
   const [user, setUser] = useState<{ id: string; email: string; name: string } | null>(null);
+  const [heatmapData, setHeatmapData] = useState<Record<string, number>>({});
 
   useEffect(() => {
     checkAuth();
@@ -54,13 +56,51 @@ export default function DashboardPage() {
       if (response.ok) {
         const data = await response.json();
         setRetrospectives(data);
-        setFilteredRetrospectives(data);
+        
+        const heatmap: Record<string, number> = {};
+        data.forEach((r: Retrospective) => {
+          const dateKey = r.date.split('T')[0];
+          heatmap[dateKey] = (heatmap[dateKey] || 0) + 1;
+        });
+        setHeatmapData(heatmap);
+        
+        applyFilters(data, activeFilter, searchQuery);
       }
     } catch (error) {
       console.error('Failed to fetch retrospectives:', error);
     } finally {
       setLoading(false);
     }
+  };
+
+  const applyFilters = (data: Retrospective[], filter: string, search: string) => {
+    let filtered = data;
+    
+    if (filter !== 'All') {
+      filtered = filtered.filter((r) => r.category === filter);
+    }
+    
+    if (search.trim()) {
+      const searchLower = search.toLowerCase();
+      filtered = filtered.filter(
+        (r) =>
+          r.title.toLowerCase().includes(searchLower) ||
+          r.content.toLowerCase().includes(searchLower) ||
+          r.tags.some((tag) => tag.toLowerCase().includes(searchLower))
+      );
+    }
+    
+    setFilteredRetrospectives(filtered);
+  };
+
+  const handleFilterChange = (filter: string) => {
+    setActiveFilter(filter);
+    applyFilters(retrospectives, filter, searchQuery);
+  };
+
+  const handleSearchChange = (search: string) => {
+    setSearchQuery(search);
+    applyFilters(retrospectives, activeFilter, search);
   };
 
   const handleDelete = async (id: string) => {
@@ -107,29 +147,98 @@ export default function DashboardPage() {
     return labels[category] || category;
   };
 
+  const calculateStreak = () => {
+    if (Object.keys(heatmapData).length === 0) return 0;
+    
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    let streak = 0;
+    let currentDate = new Date(today);
+    
+    while (true) {
+      const dateKey = currentDate.toISOString().split('T')[0];
+      if (heatmapData[dateKey]) {
+        streak++;
+        currentDate.setDate(currentDate.getDate() - 1);
+      } else {
+        break;
+      }
+    }
+    
+    return streak;
+  };
+
+  const thisMonthCount = retrospectives.filter((r) => {
+    const retroDate = new Date(r.date);
+    const now = new Date();
+    return retroDate.getMonth() === now.getMonth() && retroDate.getFullYear() === now.getFullYear();
+  }).length;
+
   const stats = [
-    { label: '총 회고', value: retrospectives.length.toString(), icon: BookOpen, change: '+0 이번 달' },
+    { label: '총 회고', value: retrospectives.length.toString(), icon: BookOpen, change: `+${thisMonthCount} 이번 달` },
     { label: '유지', value: retrospectives.filter((r) => r.category === 'keep').length.toString(), icon: TrendingUp, change: '계속 유지하세요!' },
-    { label: '분위기 점수', value: '8.5', icon: Sparkles, change: 'Top 10%' },
+    { label: '연속 기록', value: `${calculateStreak()}일`, icon: Sparkles, change: '오늘 기록하세요!' },
   ];
 
+  const getHeatmapIntensity = (dateKey: string) => {
+    const count = heatmapData[dateKey] || 0;
+    if (count === 0) return 0;
+    if (count === 1) return 1;
+    if (count === 2) return 2;
+    if (count === 3) return 3;
+    return 4;
+  };
+
   const generateHeatmap = () => {
-    return Array.from({ length: 52 }).map((_, i) => (
+    const today = new Date();
+    const oneYearAgo = new Date(today);
+    oneYearAgo.setFullYear(oneYearAgo.getFullYear() - 1);
+    
+    const startDate = new Date(oneYearAgo);
+    const dayOfWeek = startDate.getDay();
+    startDate.setDate(startDate.getDate() - dayOfWeek);
+    
+    const weeks: Date[][] = [];
+    let currentDate = new Date(startDate);
+    
+    while (currentDate <= today) {
+      const week: Date[] = [];
+      for (let j = 0; j < 7; j++) {
+        week.push(new Date(currentDate));
+        currentDate.setDate(currentDate.getDate() + 1);
+      }
+      weeks.push(week);
+    }
+    
+    const colors = [
+      'bg-slate-100',
+      'bg-emerald-200',
+      'bg-emerald-300',
+      'bg-emerald-400',
+      'bg-emerald-500',
+    ];
+    
+    const months = ['1월', '2월', '3월', '4월', '5월', '6월', '7월', '8월', '9월', '10월', '11월', '12월'];
+    const monthLabels: { month: string; index: number }[] = [];
+    let lastMonth = -1;
+    
+    return weeks.map((week, i) => (
       <div key={i} className="flex flex-col gap-1">
-        {Array.from({ length: 7 }).map((_, j) => {
-          const intensity = Math.random() > 0.7 ? Math.floor(Math.random() * 4) : 0;
-          const colors = [
-            'bg-slate-100',
-            'bg-emerald-200',
-            'bg-emerald-300',
-            'bg-emerald-400',
-            'bg-emerald-500',
-          ];
+        {week.map((date, j) => {
+          const dateKey = date.toISOString().split('T')[0];
+          const intensity = date > today ? -1 : getHeatmapIntensity(dateKey);
+          const currentMonth = date.getMonth();
+          
+          if (currentMonth !== lastMonth && date <= today) {
+            monthLabels.push({ month: months[currentMonth], index: i });
+            lastMonth = currentMonth;
+          }
+          
           return (
             <div
               key={`${i}-${j}`}
-              className={`w-2.5 h-2.5 rounded-sm ${colors[intensity]} transition-all hover:ring-2 hover:ring-slate-300 cursor-pointer`}
-              title={`Date: ${i}-${j}`}
+              className={`w-2.5 h-2.5 rounded-sm ${intensity === -1 ? 'bg-transparent' : colors[intensity]} transition-all hover:ring-2 hover:ring-slate-300 cursor-pointer`}
+              title={`${dateKey}: ${heatmapData[dateKey] || 0}개`}
             />
           );
         })}
@@ -205,6 +314,8 @@ export default function DashboardPage() {
                 <input
                   type="text"
                   placeholder="회고 검색..."
+                  value={searchQuery}
+                  onChange={(e) => handleSearchChange(e.target.value)}
                   className="pl-9 pr-4 py-2 text-sm bg-transparent outline-none w-48 md:w-64 placeholder:text-slate-400"
                 />
               </div>
@@ -292,7 +403,7 @@ export default function DashboardPage() {
               {['All', 'keep', 'stop', 'start', 'improve'].map(filter => (
                 <button
                   key={filter}
-                  onClick={() => setActiveFilter(filter)}
+                  onClick={() => handleFilterChange(filter)}
                   className={`px-4 py-1.5 rounded-full text-sm font-medium whitespace-nowrap transition-all ${activeFilter === filter
                     ? 'bg-slate-900 text-white shadow-md shadow-slate-200'
                     : 'bg-white text-slate-500 border border-slate-200 hover:border-slate-300'
@@ -301,6 +412,11 @@ export default function DashboardPage() {
                   {filter === 'All' ? '모두' : getCategoryLabel(filter)}
                 </button>
               ))}
+              {searchQuery && (
+                <span className="px-4 py-1.5 rounded-full text-sm font-medium bg-emerald-100 text-emerald-700">
+                  "{searchQuery}" 검색 결과
+                </span>
+              )}
             </div>
 
             {/* Content Grid/List */}

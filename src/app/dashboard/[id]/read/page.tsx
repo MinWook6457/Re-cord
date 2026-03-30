@@ -3,6 +3,8 @@
 import { useState, useEffect } from 'react';
 import { useRouter, useParams } from 'next/navigation';
 import Link from 'next/link';
+import ReactMarkdown from 'react-markdown';
+import remarkGfm from 'remark-gfm';
 
 interface Retrospective {
   id: string;
@@ -66,16 +68,19 @@ export default function ReadRetrospectivePage() {
 
   if (error || !retrospective) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100">
-        <nav className="bg-white shadow-sm">
-          <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex justify-between items-center">
-            <Link href="/dashboard" className="text-2xl font-bold text-blue-600">
-              회고 아카이브
+      <div className="min-h-screen bg-slate-50">
+        <nav className="bg-white shadow-sm border-b border-slate-200">
+          <div className="max-w-3xl mx-auto px-6 py-4 flex justify-between items-center">
+            <Link href="/dashboard" className="flex items-center gap-3">
+              <div className="w-8 h-8 bg-slate-900 rounded-lg flex items-center justify-center text-white">
+                <span className="font-bold font-serif italic">R</span>
+              </div>
+              <span className="font-bold text-xl text-slate-900">Record</span>
             </Link>
           </div>
         </nav>
-        <main className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-          <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded">
+        <main className="max-w-3xl mx-auto px-6 py-12">
+          <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg">
             {error}
           </div>
         </main>
@@ -84,36 +89,32 @@ export default function ReadRetrospectivePage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100" style={{ backgroundColor: 'var(--color-light-bg)' }}>
-      {/* 헤더 */}
-      <nav className="bg-white shadow-sm sticky top-0 z-50 border-b" style={{ borderColor: 'var(--color-primary)' }}>
-        <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex justify-between items-center">
-          <Link href="/dashboard" className="text-2xl font-bold text-blue-600">
-            회고 아카이브
+    <div className="min-h-screen bg-slate-50">
+      <nav className="bg-white shadow-sm sticky top-0 z-10 border-b border-slate-200">
+        <div className="max-w-3xl mx-auto px-6 py-4 flex justify-between items-center">
+          <Link href="/dashboard" className="flex items-center gap-3">
+            <div className="w-8 h-8 bg-slate-900 rounded-lg flex items-center justify-center text-white">
+              <span className="font-bold font-serif italic">R</span>
+            </div>
+            <span className="font-bold text-xl text-slate-900">Record</span>
           </Link>
-          <Link
-            href="/dashboard"
-            className="font-medium transition-colors"
-            style={{ color: 'var(--color-secondary)' }}
-          >
+          <Link href="/dashboard" className="text-slate-600 hover:text-slate-900 font-medium">
             ← 돌아가기
           </Link>
         </div>
       </nav>
 
-      {/* 메인 콘텐츠 */}
-      <main className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-        <div className="bg-white rounded-lg shadow-lg p-8">
-          {/* 제목 및 메타 정보 */}
-          <div className="mb-8 pb-8 border-b-2 border-gray-200">
+      <main className="max-w-3xl mx-auto px-6 py-12">
+        <div className="bg-white rounded-2xl shadow-sm border border-slate-100 p-8">
+          <div className="mb-8 pb-8 border-b border-slate-100">
             <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4 mb-4">
               <div className="flex-1">
-                <h1 className="text-4xl font-bold text-gray-900 mb-4">
+                <h1 className="text-3xl font-bold text-slate-900 mb-4">
                   {retrospective.title}
                 </h1>
-                <div className="flex flex-wrap items-center gap-4">
+                <div className="flex flex-wrap items-center gap-3">
                   <span
-                    className={`px-4 py-2 rounded-full text-sm font-semibold ${categoryColors[
+                    className={`px-3 py-1.5 rounded-full text-sm font-semibold ${categoryColors[
                       retrospective.category as keyof typeof categoryColors
                       ]
                       }`}
@@ -124,7 +125,7 @@ export default function ReadRetrospectivePage() {
                       ]
                     }
                   </span>
-                  <span className="text-gray-500 text-sm">
+                  <span className="text-slate-500 text-sm">
                     {new Date(retrospective.date).toLocaleDateString('ko-KR', {
                       year: 'numeric',
                       month: 'long',
@@ -136,25 +137,23 @@ export default function ReadRetrospectivePage() {
             </div>
           </div>
 
-          {/* 콘텐츠 */}
           <div className="mb-8">
-            <h2 className="text-lg font-semibold text-gray-900 mb-4">내용</h2>
-            <div className="prose prose-sm max-w-none">
-              <p className="text-gray-700 leading-relaxed whitespace-pre-wrap">
+            <h2 className="text-lg font-semibold text-slate-800 mb-4">내용</h2>
+            <div className="prose prose-slate max-w-none">
+              <ReactMarkdown remarkPlugins={[remarkGfm]}>
                 {retrospective.content}
-              </p>
+              </ReactMarkdown>
             </div>
           </div>
 
-          {/* 태그 */}
           {retrospective.tags && retrospective.tags.length > 0 && (
             <div className="mb-8">
-              <h2 className="text-lg font-semibold text-gray-900 mb-4">태그</h2>
-              <div className="flex flex-wrap gap-3">
+              <h2 className="text-lg font-semibold text-slate-800 mb-4">태그</h2>
+              <div className="flex flex-wrap gap-2">
                 {retrospective.tags.map((tag) => (
                   <span
                     key={tag}
-                    className="inline-block px-4 py-2 bg-blue-50 border border-blue-200 text-blue-700 rounded-full text-sm font-medium"
+                    className="inline-block px-3 py-1.5 bg-slate-100 text-slate-600 rounded-full text-sm font-medium"
                   >
                     #{tag}
                   </span>
@@ -163,8 +162,7 @@ export default function ReadRetrospectivePage() {
             </div>
           )}
 
-          {/* 메타 정보 */}
-          <div className="pt-8 border-t border-gray-200 text-sm text-gray-500">
+          <div className="pt-8 border-t border-slate-100 text-sm text-slate-400">
             <p>
               작성일:{' '}
               {new Date(retrospective.createdAt).toLocaleDateString('ko-KR', {
@@ -187,18 +185,16 @@ export default function ReadRetrospectivePage() {
             </p>
           </div>
 
-          {/* 버튼 */}
-          <div className="mt-8 flex gap-4 pt-8 border-t border-gray-200">
+          <div className="mt-8 flex gap-4 pt-8 border-t border-slate-100">
             <Link
               href={`/dashboard/${retrospective.id}/edit`}
-              className="px-6 py-3 text-white rounded-lg font-semibold transition-colors gradient-primary"
+              className="px-6 py-3 bg-slate-900 text-white rounded-xl font-medium hover:bg-slate-800 transition-colors"
             >
               수정
             </Link>
             <Link
               href="/dashboard"
-              className="px-6 py-3 rounded-lg font-semibold transition-colors"
-              style={{ backgroundColor: 'var(--color-light-bg)', color: 'var(--color-primary)', border: '2px solid var(--color-secondary)' }}
+              className="px-6 py-3 border-2 border-slate-200 text-slate-700 rounded-xl font-medium hover:bg-slate-50 transition-colors"
             >
               목록으로
             </Link>
